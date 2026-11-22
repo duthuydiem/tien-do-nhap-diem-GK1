@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiến độ nhập điểm Giữa kì I – THPT Nguyễn Trung Trực 2</title>
+<style>
+:root{
+  --navy:#1e3a6e;--gold:#e2b33c;
+  --bg:#f6f8fb;--panel:#ffffff;--line:#e3e7ee;--fg:#0f1a2e;--fg2:#4d5768;--fg3:#6b7383;
+  --du:#2f4e89;--dang:#b8860b;--chua:#9b1c1c;--chua-cell:#9b1c1c;
+  --grid:#e6e8ec;--axis:#ced1d6;--tipbg:#ffffff;--shadow:0 6px 24px rgba(15,26,46,.12);
+  --r:10px;
+}
+html.dark{
+  --bg:#141619;--panel:#1d1f23;--line:#2c3036;--fg:#f3f5f9;--fg2:#b8bec8;--fg3:#8e949e;
+  --du:#7fa0de;--dang:#e6b53c;--chua:#d9473b;--chua-cell:#a8322a;
+  --grid:#2a2d32;--axis:#3a3e45;--tipbg:#24272c;--shadow:0 6px 24px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Segoe UI","Be Vietnam Pro",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding:24px;display:flex;flex-direction:column;gap:20px}
+.band{background:var(--navy);color:#fff;border-radius:var(--r);padding:22px 28px;border-bottom:4px solid var(--gold);display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.kicker{margin:0 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.band h1{margin:0;font-size:clamp(20px,2.6vw,28px);line-height:1.25;font-weight:700}
+.band .sub{margin:6px 0 0;color:#dfe6f2;font-size:14px}
+.tools{display:flex;gap:8px}
+.btn{font:inherit;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;border-radius:8px;padding:7px 12px;cursor:pointer}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.lead{margin:0;font-size:18px;line-height:1.55;max-width:75ch}
+.lead b{font-variant-numeric:tabular-nums}
+.note{margin:6px 0 0;color:var(--fg2);max-width:85ch}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;margin-right:6px;background:color-mix(in srgb,var(--navy) 14%,transparent);color:var(--fg);vertical-align:1px}
+html.dark .tag{background:color-mix(in srgb,var(--du) 22%,transparent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.kpi{border-top:3px solid var(--navy)}
+html.dark .kpi{border-top-color:var(--du)}
+.kpi.k-du{border-top-color:var(--du)}.kpi.k-dang{border-top-color:var(--dang)}.kpi.k-chua{border-top-color:var(--chua)}
+.kpi h3{margin:0;font-size:12px;color:var(--fg2);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.kpi .big{display:block;margin-top:6px;font-size:32px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi p{margin:6px 0 0;font-size:13px;color:var(--fg2)}
+.kpi p b{color:var(--fg)}
+.grid2{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px}
+@media (max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
+h2{margin:0;font-size:17px;font-weight:700}
+h2::before{content:"";display:inline-block;width:6px;height:1em;background:var(--gold);border-radius:2px;margin-right:8px;vertical-align:-2px}
+.desc{margin:4px 0 12px;color:var(--fg2);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 8px;padding:0;list-style:none;font-size:13px;color:var(--fg2)}
+.legend li{display:flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+.sw-du{background:var(--du)}.sw-dang{background:var(--dang)}.sw-chua{background:var(--chua)}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:inherit}
+.ylab{font-size:13px;fill:var(--fg)}
+.endlab{font-size:12px;fill:var(--fg2);font-variant-numeric:tabular-nums}
+.axis text{fill:var(--fg2);font-size:11px}
+.gridl{stroke:var(--grid)}
+.axisl{stroke:var(--axis)}
+.row{cursor:pointer}
+.row:hover .hit,.row:focus .hit{fill:var(--fg);fill-opacity:.05}
+.row:focus{outline:none}
+.tip{position:absolute;pointer-events:none;background:var(--tipbg);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.45;max-width:260px;z-index:5;display:none}
+.tip b{display:block;margin-bottom:2px}
+.scroll{overflow-x:auto}
+.mt{border-collapse:separate;border-spacing:2px;font-size:12.5px;font-variant-numeric:tabular-nums;min-width:680px}
+.mt th{font-weight:700;color:var(--fg2);padding:4px 2px;white-space:nowrap;font-size:11.5px}
+.mt thead th{vertical-align:bottom}
+.mt th.rowh{position:sticky;left:0;background:var(--panel);text-align:left;padding-right:8px;color:var(--fg);z-index:1}
+.mt td{min-width:40px;height:26px;text-align:center;border-radius:4px}
+.mt td.c-du{background:color-mix(in srgb,var(--du) 14%,transparent);color:var(--du)}
+.mt td.c-dang{background:color-mix(in srgb,var(--dang) 30%,transparent);color:var(--fg);font-weight:700}
+.mt td.c-chua{background:var(--chua-cell);color:#fff;font-weight:700}
+.mt td.c-tl{padding:0 6px;text-align:right;font-weight:700;color:var(--fg);min-width:56px}
+.mt tr.k1 th.rowh,.mt tr.k1 td{border-top:2px solid var(--gold)}
+.filters{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-bottom:10px}
+.filters label{font-size:13px;color:var(--fg2);display:flex;align-items:center;gap:6px}
+select{font:inherit;font-size:14px;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;max-width:100%}
+.count{font-size:13px;color:var(--fg2);margin-left:auto}
+.tablewrap{overflow:auto;max-height:560px;border:1px solid var(--line);border-radius:var(--r)}
+table.list{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.list th{position:sticky;top:0;background:var(--panel);text-align:left;font-size:12px;color:var(--fg2);padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;z-index:1;cursor:pointer;user-select:none}
+.list th:hover{color:var(--fg)}
+.list th .arr{font-size:10px;margin-left:3px;opacity:.7}
+.list td{padding:8px 10px;border-bottom:1px solid var(--line)}
+.num{text-align:right}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.b-du{color:var(--du);background:color-mix(in srgb,var(--du) 13%,transparent)}
+.b-dang{color:var(--fg);background:color-mix(in srgb,var(--dang) 28%,transparent)}
+.b-chua{color:var(--chua);background:color-mix(in srgb,var(--chua) 13%,transparent)}
+details summary{cursor:pointer;font-weight:700}
+details ul{margin:10px 0 0;padding-left:20px}
+details li{margin:6px 0}
+.foot{margin:0;font-size:12.5px;color:var(--fg3)}
+@media (max-width:620px){.wrap{padding:12px;gap:14px}.band{padding:16px}.lead{font-size:16px}.kpi .big{font-size:26px}.count{margin-left:0;width:100%}}
+@media print{
+  html.dark{--bg:#fff;--panel:#fff;--line:#d9dde4;--fg:#0f1a2e;--fg2:#4d5768;--du:#2f4e89;--dang:#b8860b;--chua:#9b1c1c;--chua-cell:#9b1c1c;--grid:#e6e8ec;--axis:#ced1d6}
+  body{background:#fff}.tools{display:none}.tablewrap{max-height:none;overflow:visible}
+  .band,.mt td,.sw,.badge,.kpi{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .card{break-inside:avoid}#danh-sach{break-before:page}
+  details{display:block}details>*{display:block}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="band">
+    <div>
+      <p class="kicker">Trường THPT Nguyễn Trung Trực 2 · Năm học 2026–2027</p>
+      <h1>Tiến độ nhập điểm Kiểm tra giữa kì I — Toàn trường</h1>
+      <p class="sub">Thống kê lớp–môn còn thiếu điểm trên hệ thống · Dữ liệu xuất ngày 22/11/2026</p>
+    </div>
+    <div class="tools">
+      <button class="btn" id="btn-theme" type="button" aria-pressed="false">Nền tối</button>
+      <button class="btn" id="btn-print" type="button">In / PDF</button>
+    </div>
+  </header>
+
+  <section>
+    <p class="lead" id="lead"></p>
+    <p class="note"><span class="tag">Nhận định</span><b id="n-thieu1"></b> lượt lớp–môn chỉ thiếu đúng 1 học sinh — thường do học sinh vắng kiểm tra; nên xác minh và tổ chức kiểm tra bù trước khi nhắc giáo viên.</p>
+  </section>
+
+  <section class="kpis">
+    <div class="card kpi"><h3>Lượt lớp–môn</h3><span class="big" id="k-lopmon"></span><p><b id="k-solop"></b> lớp · <b id="k-somon"></b> môn/hoạt động</p></div>
+    <div class="card kpi k-du"><h3>✓ Đã nhập đủ</h3><span class="big" id="k-du"></span><p><b id="k-du-pct"></b> số lượt lớp–môn</p></div>
+    <div class="card kpi k-dang"><h3>◐ Nhập chưa đủ</h3><span class="big" id="k-dang"></span><p>Lớp–môn còn thiếu một phần học sinh</p></div>
+    <div class="card kpi k-chua"><h3>✕ Chưa nhập</h3><span class="big" id="k-chua"></span><p>Lớp–môn cả lớp chưa có điểm</p></div>
+    <div class="card kpi k-chua"><h3>Đầu điểm còn thiếu</h3><span class="big" id="k-thieu"></span><p><b id="k-thieu-pct"></b> trên <b id="k-daudiem"></b> đầu điểm</p></div>
+  </section>
+
+  <section class="grid2">
+    <div class="card">
+      <h2>Tiến độ theo môn</h2>
+      <p class="desc">Mỗi thanh là số lớp học môn đó, chia theo trạng thái nhập điểm; xếp theo số đầu điểm còn thiếu. Bấm một môn để lọc danh sách bên dưới.</p>
+      <ul class="legend"><li><i class="sw sw-du"></i>✓ Đã nhập đủ</li><li><i class="sw sw-dang"></i>◐ Nhập chưa đủ</li><li><i class="sw sw-chua"></i>✕ Chưa nhập</li></ul>
+      <div class="chart" id="c-mon"></div>
+    </div>
+    <div class="card">
+      <h2>Tỉ lệ đầu điểm thiếu theo khối</h2>
+      <p class="desc">Số đầu điểm chưa nhập ÷ tổng số đầu điểm của khối (cộng sĩ số các lớp–môn).</p>
+      <div class="chart" id="c-khoi"></div>
+      <h2 style="margin-top:22px">Lớp thiếu nhiều nhất</h2>
+      <p class="desc">5 lớp có tỉ lệ đầu điểm thiếu cao nhất — ưu tiên GVCN phối hợp đôn đốc.</p>
+      <div class="chart" id="c-lop"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Ma trận lớp × môn</h2>
+    <p class="desc">Số trong ô là số học sinh chưa có điểm; ✓ là đã nhập đủ; ô trống là lớp không học môn đó. Cột cuối là tỉ lệ đầu điểm thiếu của lớp. Rê chuột vào ô để xem chi tiết.</p>
+    <ul class="legend"><li><i class="sw sw-du"></i>✓ Đã nhập đủ</li><li><i class="sw sw-dang"></i>◐ Nhập chưa đủ (số HS thiếu)</li><li><i class="sw sw-chua"></i>✕ Chưa nhập (cả lớp)</li></ul>
+    <div class="scroll" id="matrix"></div>
+  </section>
+
+  <section class="card" id="danh-sach">
+    <h2>Danh sách lớp–môn cần đôn đốc</h2>
+    <p class="desc">Lọc theo môn, khối và trạng thái; bấm tiêu đề cột để sắp xếp. Mặc định hiện các lớp–môn còn thiếu điểm, xếp theo số học sinh thiếu.</p>
+    <div class="filters">
+      <label>Môn <select id="f-mon" aria-label="Lọc theo môn"><option value="">Tất cả môn</option></select></label>
+      <label>Khối <select id="f-khoi" aria-label="Lọc theo khối"><option value="">Tất cả khối</option><option value="10">Khối 10</option><option value="11">Khối 11</option><option value="12">Khối 12</option></select></label>
+      <label>Trạng thái <select id="f-tt" aria-label="Lọc theo trạng thái"><option value="thieu">Còn thiếu điểm</option><option value="chua">✕ Chưa nhập</option><option value="dang">◐ Nhập chưa đủ</option><option value="du">✓ Đã nhập đủ</option><option value="">Tất cả</option></select></label>
+      <span class="count">Đang hiển thị <b id="f-count"></b> dòng</span>
+    </div>
+    <div class="tablewrap">
+      <table class="list">
+        <thead><tr>
+          <th data-k="mon">Môn<span class="arr"></span></th><th data-k="lop">Lớp<span class="arr"></span></th>
+          <th data-k="si_so" class="num">Sĩ số<span class="arr"></span></th><th data-k="chua_co_diem" class="num">Chưa có điểm<span class="arr"></span></th>
+          <th data-k="ti_le" class="num">Tỉ lệ thiếu<span class="arr"></span></th><th data-k="tt">Trạng thái<span class="arr"></span></th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <details class="card" open>
+    <summary>Cách đọc số liệu và lưu ý khi sử dụng</summary>
+    <ul>
+      <li><span class="tag">Dữ liệu gốc</span>Tệp “tk_thieu_diem_tat_ca_cac_lop_nhap_diem.xls” — Thống kê giáo viên chưa nhập điểm, Kiểm tra giữa kì 1, toàn trường: mỗi dòng là một lớp–môn, gồm sĩ số và số học sinh chưa có điểm.</li>
+      <li><span class="tag">Quy ước</span>Đã nhập đủ = 0 học sinh thiếu; Chưa nhập = số học sinh thiếu bằng sĩ số; Nhập chưa đủ = các trường hợp còn lại. Tổng đầu điểm = cộng sĩ số của mọi lớp–môn.</li>
+      <li><span class="tag">Lưu ý</span>Tệp không có tên giáo viên. Để nhắc đúng người, đối chiếu lớp–môn với bảng phân công chuyên môn học kì I.</li>
+      <li><span class="tag">Nhận định</span>Môn có ít hơn 39 lớp là môn lựa chọn hoặc không có trong tệp ở mọi lớp; tỉ lệ được tính trên các lớp có trong tệp.</li>
+      <li><span class="tag">Đề xuất</span>Ưu tiên nhắc các ô “Chưa nhập” (cả lớp chưa có điểm) trước; các ô thiếu 1–2 học sinh chuyển GVCN xác minh vắng kiểm tra.</li>
+    </ul>
+  </details>
+
+  <p class="foot">Bộ màu navy–trắng–vàng đã kiểm định độ tương phản (WCAG 2.1) và độ phân biệt khi mù màu đỏ–lục; mọi màu trạng thái đi kèm ký hiệu ✓ ◐ ✕ và nhãn chữ. File chạy offline, không gọi tài nguyên bên ngoài.</p>
+</div>
+
+<script>
+const ROWS = [{"mon":"Toán học","lop":"10A1","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Toán học","lop":"12A1","khoi":"12","si_so":46,"chua_co_diem":2},{"mon":"Toán học","lop":"12A14","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Toán học","lop":"10A4","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Toán học","lop":"10A8","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Toán học","lop":"11A1","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Toán học","lop":"12A6","khoi":"12","si_so":47,"chua_co_diem":1},{"mon":"Toán học","lop":"12A13","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Toán học","lop":"11A3","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Toán học","lop":"11A12","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Toán học","lop":"12A3","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Toán học","lop":"12A12","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Toán học","lop":"10A2","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Toán học","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Toán học","lop":"12A8","khoi":"12","si_so":41,"chua_co_diem":0},{"mon":"Toán học","lop":"12A9","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Toán học","lop":"11A5","khoi":"11","si_so":40,"chua_co_diem":1},{"mon":"Toán học","lop":"11A8","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Toán học","lop":"11A9","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Toán học","lop":"12A7","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Toán học","lop":"10A3","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Toán học","lop":"10A5","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Toán học","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":0},{"mon":"Toán học","lop":"11A4","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Toán học","lop":"10A10","khoi":"10","si_so":46,"chua_co_diem":1},{"mon":"Toán học","lop":"10A12","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Toán học","lop":"12A2","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Toán học","lop":"11A2","khoi":"11","si_so":46,"chua_co_diem":0},{"mon":"Toán học","lop":"11A7","khoi":"11","si_so":44,"chua_co_diem":0},{"mon":"Toán học","lop":"12A5","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Toán học","lop":"12A10","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Toán học","lop":"11A6","khoi":"11","si_so":38,"chua_co_diem":0},{"mon":"Toán học","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Toán học","lop":"12A4","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Toán học","lop":"12A11","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Toán học","lop":"10A6","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Toán học","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":1},{"mon":"Toán học","lop":"11A10","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Toán học","lop":"11A11","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"10A1","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A9","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A12","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"10A8","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"10A12","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A4","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A7","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A8","khoi":"12","si_so":41,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"10A6","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A6","khoi":"11","si_so":38,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A9","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A10","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A11","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A1","khoi":"12","si_so":46,"chua_co_diem":1},{"mon":"Ngữ văn","lop":"12A2","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A14","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A1","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A4","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A12","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A13","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"10A10","khoi":"10","si_so":46,"chua_co_diem":1},{"mon":"Ngữ văn","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A2","khoi":"11","si_so":46,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A7","khoi":"11","si_so":44,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"10A3","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"10A5","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":1},{"mon":"Ngữ văn","lop":"12A10","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A3","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"11A5","khoi":"11","si_so":40,"chua_co_diem":1},{"mon":"Ngữ văn","lop":"11A8","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A11","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"10A2","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"10A4","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A3","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A5","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Ngữ văn","lop":"12A6","khoi":"12","si_so":47,"chua_co_diem":1},{"mon":"Vật lí","lop":"11A5","khoi":"11","si_so":40,"chua_co_diem":0},{"mon":"Vật lí","lop":"11A10","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Vật lí","lop":"10A3","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Vật lí","lop":"10A5","khoi":"10","si_so":45,"chua_co_diem":45},{"mon":"Vật lí","lop":"12A2","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Vật lí","lop":"12A7","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Vật lí","lop":"12A11","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Vật lí","lop":"10A4","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Vật lí","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":1},{"mon":"Vật lí","lop":"11A3","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Vật lí","lop":"11A7","khoi":"11","si_so":44,"chua_co_diem":0},{"mon":"Vật lí","lop":"11A6","khoi":"11","si_so":38,"chua_co_diem":0},{"mon":"Vật lí","lop":"11A9","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Vật lí","lop":"11A2","khoi":"11","si_so":46,"chua_co_diem":46},{"mon":"Vật lí","lop":"10A8","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Vật lí","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":44},{"mon":"Vật lí","lop":"10A1","khoi":"10","si_so":45,"chua_co_diem":45},{"mon":"Vật lí","lop":"10A2","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Vật lí","lop":"10A6","khoi":"10","si_so":45,"chua_co_diem":45},{"mon":"Vật lí","lop":"12A1","khoi":"12","si_so":46,"chua_co_diem":1},{"mon":"Vật lí","lop":"12A6","khoi":"12","si_so":47,"chua_co_diem":1},{"mon":"Vật lí","lop":"12A8","khoi":"12","si_so":41,"chua_co_diem":1},{"mon":"Vật lí","lop":"11A4","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Vật lí","lop":"12A5","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Vật lí","lop":"12A9","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Vật lí","lop":"11A1","khoi":"11","si_so":47,"chua_co_diem":47},{"mon":"Vật lí","lop":"11A8","khoi":"11","si_so":43,"chua_co_diem":43},{"mon":"Vật lí","lop":"12A3","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Vật lí","lop":"12A4","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Vật lí","lop":"12A10","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Hóa học","lop":"10A5","khoi":"10","si_so":45,"chua_co_diem":45},{"mon":"Hóa học","lop":"12A1","khoi":"12","si_so":46,"chua_co_diem":45},{"mon":"Hóa học","lop":"12A3","khoi":"12","si_so":45,"chua_co_diem":45},{"mon":"Hóa học","lop":"10A3","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Hóa học","lop":"11A1","khoi":"11","si_so":47,"chua_co_diem":47},{"mon":"Hóa học","lop":"11A4","khoi":"11","si_so":45,"chua_co_diem":45},{"mon":"Hóa học","lop":"11A5","khoi":"11","si_so":40,"chua_co_diem":0},{"mon":"Hóa học","lop":"11A6","khoi":"11","si_so":38,"chua_co_diem":0},{"mon":"Hóa học","lop":"11A3","khoi":"11","si_so":47,"chua_co_diem":47},{"mon":"Hóa học","lop":"12A6","khoi":"12","si_so":47,"chua_co_diem":1},{"mon":"Hóa học","lop":"12A7","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Hóa học","lop":"11A2","khoi":"11","si_so":46,"chua_co_diem":46},{"mon":"Hóa học","lop":"10A1","khoi":"10","si_so":45,"chua_co_diem":45},{"mon":"Hóa học","lop":"10A6","khoi":"10","si_so":45,"chua_co_diem":45},{"mon":"Hóa học","lop":"12A5","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Hóa học","lop":"10A2","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Hóa học","lop":"10A4","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Hóa học","lop":"12A2","khoi":"12","si_so":44,"chua_co_diem":44},{"mon":"Hóa học","lop":"12A4","khoi":"12","si_so":45,"chua_co_diem":45},{"mon":"Sinh học","lop":"10A1","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Sinh học","lop":"10A4","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Sinh học","lop":"10A6","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Sinh học","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Sinh học","lop":"11A5","khoi":"11","si_so":40,"chua_co_diem":1},{"mon":"Sinh học","lop":"11A12","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Sinh học","lop":"12A1","khoi":"12","si_so":46,"chua_co_diem":1},{"mon":"Sinh học","lop":"12A2","khoi":"12","si_so":44,"chua_co_diem":1},{"mon":"Sinh học","lop":"12A5","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Sinh học","lop":"12A12","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Sinh học","lop":"10A2","khoi":"10","si_so":46,"chua_co_diem":1},{"mon":"Sinh học","lop":"10A12","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Sinh học","lop":"12A6","khoi":"12","si_so":47,"chua_co_diem":1},{"mon":"Sinh học","lop":"12A7","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Sinh học","lop":"12A14","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Sinh học","lop":"10A3","khoi":"10","si_so":46,"chua_co_diem":1},{"mon":"Sinh học","lop":"10A5","khoi":"10","si_so":45,"chua_co_diem":1},{"mon":"Sinh học","lop":"10A10","khoi":"10","si_so":46,"chua_co_diem":2},{"mon":"Sinh học","lop":"11A1","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Sinh học","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Sinh học","lop":"11A2","khoi":"11","si_so":46,"chua_co_diem":46},{"mon":"Sinh học","lop":"11A3","khoi":"11","si_so":47,"chua_co_diem":47},{"mon":"Sinh học","lop":"11A4","khoi":"11","si_so":45,"chua_co_diem":45},{"mon":"Sinh học","lop":"11A6","khoi":"11","si_so":38,"chua_co_diem":38},{"mon":"Sinh học","lop":"11A11","khoi":"11","si_so":37,"chua_co_diem":37},{"mon":"Sinh học","lop":"12A3","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Sinh học","lop":"12A4","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Sinh học","lop":"12A13","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Tin học","lop":"10A1","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Tin học","lop":"10A4","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Tin học","lop":"11A3","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Tin học","lop":"11A5","khoi":"11","si_so":40,"chua_co_diem":0},{"mon":"Tin học","lop":"10A3","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Tin học","lop":"10A5","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Tin học","lop":"11A2","khoi":"11","si_so":46,"chua_co_diem":0},{"mon":"Tin học","lop":"11A4","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Tin học","lop":"12A1","khoi":"12","si_so":46,"chua_co_diem":0},{"mon":"Tin học","lop":"12A3","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Tin học","lop":"12A5","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Tin học","lop":"10A2","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Tin học","lop":"10A6","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Tin học","lop":"11A1","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Tin học","lop":"11A6","khoi":"11","si_so":38,"chua_co_diem":0},{"mon":"Tin học","lop":"12A2","khoi":"12","si_so":44,"chua_co_diem":44},{"mon":"Tin học","lop":"12A4","khoi":"12","si_so":45,"chua_co_diem":45},{"mon":"Tin học","lop":"12A6","khoi":"12","si_so":47,"chua_co_diem":47},{"mon":"Tin học","lop":"12A7","khoi":"12","si_so":43,"chua_co_diem":43},{"mon":"Lịch sử","lop":"10A12","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Lịch sử","lop":"11A1","khoi":"11","si_so":47,"chua_co_diem":47},{"mon":"Lịch sử","lop":"11A7","khoi":"11","si_so":44,"chua_co_diem":44},{"mon":"Lịch sử","lop":"11A9","khoi":"11","si_so":43,"chua_co_diem":43},{"mon":"Lịch sử","lop":"11A6","khoi":"11","si_so":38,"chua_co_diem":38},{"mon":"Lịch sử","lop":"11A11","khoi":"11","si_so":37,"chua_co_diem":37},{"mon":"Lịch sử","lop":"12A2","khoi":"12","si_so":44,"chua_co_diem":44},{"mon":"Lịch sử","lop":"12A7","khoi":"12","si_so":43,"chua_co_diem":43},{"mon":"Lịch sử","lop":"12A8","khoi":"12","si_so":41,"chua_co_diem":41},{"mon":"Lịch sử","lop":"12A10","khoi":"12","si_so":44,"chua_co_diem":44},{"mon":"Lịch sử","lop":"12A13","khoi":"12","si_so":45,"chua_co_diem":45},{"mon":"Lịch sử","lop":"10A1","khoi":"10","si_so":45,"chua_co_diem":1},{"mon":"Lịch sử","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":1},{"mon":"Lịch sử","lop":"12A1","khoi":"12","si_so":46,"chua_co_diem":1},{"mon":"Lịch sử","lop":"12A4","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Lịch sử","lop":"12A6","khoi":"12","si_so":47,"chua_co_diem":1},{"mon":"Lịch sử","lop":"12A11","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Lịch sử","lop":"11A8","khoi":"11","si_so":43,"chua_co_diem":43},{"mon":"Lịch sử","lop":"12A3","khoi":"12","si_so":45,"chua_co_diem":45},{"mon":"Lịch sử","lop":"12A5","khoi":"12","si_so":45,"chua_co_diem":45},{"mon":"Lịch sử","lop":"12A9","khoi":"12","si_so":44,"chua_co_diem":44},{"mon":"Lịch sử","lop":"12A12","khoi":"12","si_so":42,"chua_co_diem":42},{"mon":"Lịch sử","lop":"12A14","khoi":"12","si_so":43,"chua_co_diem":43},{"mon":"Lịch sử","lop":"10A4","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Lịch sử","lop":"10A5","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Lịch sử","lop":"10A6","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Lịch sử","lop":"11A3","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Lịch sử","lop":"11A10","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Lịch sử","lop":"11A12","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Lịch sử","lop":"10A2","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Lịch sử","lop":"10A3","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Lịch sử","lop":"10A8","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Lịch sử","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":0},{"mon":"Lịch sử","lop":"10A10","khoi":"10","si_so":46,"chua_co_diem":2},{"mon":"Lịch sử","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Lịch sử","lop":"11A2","khoi":"11","si_so":46,"chua_co_diem":0},{"mon":"Lịch sử","lop":"11A4","khoi":"11","si_so":45,"chua_co_diem":2},{"mon":"Lịch sử","lop":"11A5","khoi":"11","si_so":40,"chua_co_diem":0},{"mon":"Lịch sử","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":1},{"mon":"Địa lí","lop":"11A9","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Địa lí","lop":"11A11","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Địa lí","lop":"11A12","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Địa lí","lop":"12A10","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Địa lí","lop":"12A11","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Địa lí","lop":"10A10","khoi":"10","si_so":46,"chua_co_diem":1},{"mon":"Địa lí","lop":"10A12","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Địa lí","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Địa lí","lop":"11A7","khoi":"11","si_so":44,"chua_co_diem":0},{"mon":"Địa lí","lop":"12A12","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Địa lí","lop":"12A13","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Địa lí","lop":"10A8","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Địa lí","lop":"12A8","khoi":"12","si_so":41,"chua_co_diem":0},{"mon":"Địa lí","lop":"12A9","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Địa lí","lop":"12A14","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Địa lí","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":1},{"mon":"Địa lí","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":0},{"mon":"Địa lí","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Địa lí","lop":"11A8","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Địa lí","lop":"11A10","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"10A4","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":1},{"mon":"Ngoại ngữ","lop":"12A1","khoi":"12","si_so":46,"chua_co_diem":1},{"mon":"Ngoại ngữ","lop":"12A14","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"12A3","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"12A9","khoi":"12","si_so":44,"chua_co_diem":1},{"mon":"Ngoại ngữ","lop":"12A11","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"10A1","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"10A12","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"12A6","khoi":"12","si_so":47,"chua_co_diem":1},{"mon":"Ngoại ngữ","lop":"12A10","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"12A13","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"10A3","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"11A7","khoi":"11","si_so":44,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"11A9","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"11A12","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"11A4","khoi":"11","si_so":45,"chua_co_diem":2},{"mon":"Ngoại ngữ","lop":"11A10","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"12A4","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"12A8","khoi":"12","si_so":41,"chua_co_diem":1},{"mon":"Ngoại ngữ","lop":"10A6","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"10A8","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"11A2","khoi":"11","si_so":46,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"11A11","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"11A5","khoi":"11","si_so":40,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"12A5","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"12A7","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"11A3","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"11A6","khoi":"11","si_so":38,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"12A2","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"12A12","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"10A2","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"10A10","khoi":"10","si_so":46,"chua_co_diem":2},{"mon":"Ngoại ngữ","lop":"11A1","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"10A5","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Ngoại ngữ","lop":"11A8","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Công nghệ","lop":"11A8","khoi":"11","si_so":43,"chua_co_diem":1},{"mon":"Công nghệ","lop":"11A10","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Công nghệ","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Công nghệ","lop":"10A12","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Công nghệ","lop":"11A7","khoi":"11","si_so":44,"chua_co_diem":0},{"mon":"Công nghệ","lop":"11A9","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Công nghệ","lop":"12A10","khoi":"12","si_so":44,"chua_co_diem":44},{"mon":"Công nghệ","lop":"12A11","khoi":"12","si_so":42,"chua_co_diem":42},{"mon":"Công nghệ","lop":"12A8","khoi":"12","si_so":41,"chua_co_diem":0},{"mon":"Công nghệ","lop":"12A9","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Công nghệ","lop":"10A10","khoi":"10","si_so":46,"chua_co_diem":1},{"mon":"Công nghệ","lop":"11A11","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Công nghệ","lop":"11A12","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Công nghệ","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Công nghệ","lop":"12A12","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Công nghệ","lop":"12A13","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Công nghệ","lop":"12A14","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Công nghệ","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":1},{"mon":"Công nghệ","lop":"10A8","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Công nghệ","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"10A12","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"11A6","khoi":"11","si_so":38,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"11A7","khoi":"11","si_so":44,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A7","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A8","khoi":"12","si_so":41,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"10A6","khoi":"10","si_so":45,"chua_co_diem":5},{"mon":"Giáo dục thể chất","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":1},{"mon":"Giáo dục thể chất","lop":"11A1","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"11A2","khoi":"11","si_so":46,"chua_co_diem":2},{"mon":"Giáo dục thể chất","lop":"11A3","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A9","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A10","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A11","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"10A4","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"10A5","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"11A11","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"11A12","khoi":"11","si_so":37,"chua_co_diem":1},{"mon":"Giáo dục thể chất","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A1","khoi":"12","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A2","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A3","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"10A1","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"10A2","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"10A3","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"11A8","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"11A9","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"11A10","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A4","khoi":"12","si_so":45,"chua_co_diem":1},{"mon":"Giáo dục thể chất","lop":"12A5","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A6","khoi":"12","si_so":47,"chua_co_diem":1},{"mon":"Giáo dục thể chất","lop":"10A8","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"10A10","khoi":"10","si_so":46,"chua_co_diem":1},{"mon":"Giáo dục thể chất","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"11A4","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"11A5","khoi":"11","si_so":40,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A12","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A13","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục thể chất","lop":"12A14","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A12","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A6","khoi":"11","si_so":38,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A7","khoi":"11","si_so":44,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A1","khoi":"12","si_so":46,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A5","khoi":"10","si_so":45,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A6","khoi":"10","si_so":45,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":4},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A8","khoi":"10","si_so":46,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":3},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A10","khoi":"10","si_so":46,"chua_co_diem":2},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A1","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A2","khoi":"11","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A3","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A4","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A5","khoi":"11","si_so":40,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A9","khoi":"12","si_so":44,"chua_co_diem":2},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A10","khoi":"12","si_so":44,"chua_co_diem":44},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A11","khoi":"12","si_so":42,"chua_co_diem":42},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A12","khoi":"12","si_so":42,"chua_co_diem":42},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A13","khoi":"12","si_so":45,"chua_co_diem":45},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A14","khoi":"12","si_so":43,"chua_co_diem":43},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A1","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A2","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A3","khoi":"10","si_so":46,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"10A4","khoi":"10","si_so":46,"chua_co_diem":7},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A8","khoi":"11","si_so":43,"chua_co_diem":4},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A9","khoi":"11","si_so":43,"chua_co_diem":2},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A10","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A11","khoi":"11","si_so":37,"chua_co_diem":10},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A12","khoi":"11","si_so":37,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A2","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A3","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A4","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A5","khoi":"12","si_so":45,"chua_co_diem":1},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A6","khoi":"12","si_so":47,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A7","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Giáo dục quốc phòng và an ninh","lop":"12A8","khoi":"12","si_so":41,"chua_co_diem":0},{"mon":"Nội dung giáo dục của địa phương","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":43},{"mon":"Nội dung giáo dục của địa phương","lop":"10A5","khoi":"10","si_so":45,"chua_co_diem":45},{"mon":"Nội dung giáo dục của địa phương","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":44},{"mon":"Nội dung giáo dục của địa phương","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":44},{"mon":"Nội dung giáo dục của địa phương","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Giáo dục kinh tế và pháp luật","lop":"10A8","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"11A8","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"11A10","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"11A12","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"11A7","khoi":"11","si_so":44,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"11A9","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":1},{"mon":"Giáo dục kinh tế và pháp luật","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"10A10","khoi":"10","si_so":46,"chua_co_diem":3},{"mon":"Giáo dục kinh tế và pháp luật","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"10A12","khoi":"10","si_so":46,"chua_co_diem":1},{"mon":"Giáo dục kinh tế và pháp luật","lop":"12A9","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"12A11","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"12A13","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"11A11","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":43},{"mon":"Giáo dục kinh tế và pháp luật","lop":"12A8","khoi":"12","si_so":41,"chua_co_diem":1},{"mon":"Giáo dục kinh tế và pháp luật","lop":"12A10","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"12A12","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Giáo dục kinh tế và pháp luật","lop":"12A14","khoi":"12","si_so":43,"chua_co_diem":4},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A3","khoi":"12","si_so":45,"chua_co_diem":45},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"10A12","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"10A1","khoi":"10","si_so":45,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A6","khoi":"11","si_so":38,"chua_co_diem":38},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A6","khoi":"12","si_so":47,"chua_co_diem":47},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A1","khoi":"12","si_so":46,"chua_co_diem":1},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"10A3","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"10A9","khoi":"10","si_so":44,"chua_co_diem":44},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A10","khoi":"11","si_so":45,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A2","khoi":"11","si_so":46,"chua_co_diem":46},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A8","khoi":"11","si_so":43,"chua_co_diem":43},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A8","khoi":"12","si_so":41,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A9","khoi":"12","si_so":44,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A13","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A14","khoi":"12","si_so":43,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"10A10","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A3","khoi":"11","si_so":47,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A7","khoi":"11","si_so":44,"chua_co_diem":44},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"10A6","khoi":"10","si_so":45,"chua_co_diem":45},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A9","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"10A4","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A7","khoi":"12","si_so":43,"chua_co_diem":43},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A10","khoi":"12","si_so":44,"chua_co_diem":44},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A11","khoi":"12","si_so":42,"chua_co_diem":42},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"10A8","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A12","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A5","khoi":"11","si_so":40,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A12","khoi":"12","si_so":42,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A4","khoi":"11","si_so":45,"chua_co_diem":45},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A13","khoi":"11","si_so":43,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A11","khoi":"11","si_so":37,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"10A2","khoi":"10","si_so":46,"chua_co_diem":46},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"10A11","khoi":"10","si_so":46,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"11A1","khoi":"11","si_so":47,"chua_co_diem":47},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"10A7","khoi":"10","si_so":44,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A5","khoi":"12","si_so":45,"chua_co_diem":0},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A2","khoi":"12","si_so":44,"chua_co_diem":44},{"mon":"Hoạt động trải nghiệm, hướng nghiệp","lop":"12A4","khoi":"12","si_so":45,"chua_co_diem":45}];
+(function () {
+  "use strict";
+  const NS = "http://www.w3.org/2000/svg";
+  const fmt = (n) => Math.round(n).toLocaleString("vi-VN").replace(/,/g, ".");
+  const pct = (v) => v.toFixed(1).replace(".", ",") + "%";
+  const r1 = (a, b) => (b ? Math.round(a / b * 1000) / 10 : 0);
+  const NGAN = {"Toán học":"Toán","Ngữ văn":"Văn","Vật lí":"Lí","Hóa học":"Hóa","Sinh học":"Sinh","Tin học":"Tin","Lịch sử":"Sử","Địa lí":"Địa","Ngoại ngữ":"NN","Công nghệ":"CN","Giáo dục thể chất":"GDTC","Giáo dục quốc phòng và an ninh":"QP-AN","Nội dung giáo dục của địa phương":"GDĐP","Giáo dục kinh tế và pháp luật":"KT&PL","Hoạt động trải nghiệm, hướng nghiệp":"HĐTN"};
+  const TT = {du: "✓ Đã nhập đủ", dang: "◐ Nhập chưa đủ", chua: "✕ Chưa nhập"};
+  const TT_ORDER = {chua: 0, dang: 1, du: 2};
+  const lopKey = (l) => { const m = /^(\d+)A(\d+)$/.exec(l); return m ? (+m[1]) * 100 + (+m[2]) : 9999; };
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, attrs, text) => { const e = document.createElement(tag); if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+  const sv = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+
+  // ---------- chuẩn hóa ----------
+  const rows = ROWS.map((r) => {
+    const s = +r.si_so, m = +r.chua_co_diem;
+    return {mon: r.mon, lop: r.lop, khoi: String(r.khoi), si_so: s, chua_co_diem: m, ti_le: r1(m, s), tt: m === 0 ? "du" : m >= s ? "chua" : "dang"};
+  });
+  const mons = [...new Set(rows.map((r) => r.mon))];
+  const lops = [...new Set(rows.map((r) => r.lop))].sort((a, b) => lopKey(a) - lopKey(b));
+
+  // ---------- tổng hợp ----------
+  const T = {n: rows.length, du: 0, dang: 0, chua: 0, dau: 0, thieu: 0, mot: 0};
+  rows.forEach((r) => { T[r.tt]++; T.dau += r.si_so; T.thieu += r.chua_co_diem; if (r.chua_co_diem === 1 && r.si_so > 1) T.mot++; });
+  const group = (key) => {
+    const g = new Map();
+    rows.forEach((r) => {
+      const k = r[key];
+      if (!g.has(k)) g.set(k, {key: k, so_lop: 0, du: 0, dang: 0, chua: 0, dau: 0, thieu: 0});
+      const o = g.get(k); o.so_lop++; o[r.tt]++; o.dau += r.si_so; o.thieu += r.chua_co_diem;
+    });
+    return [...g.values()].map((o) => Object.assign(o, {ti_le: r1(o.thieu, o.dau)}));
+  };
+  const byMon = group("mon").sort((a, b) => b.thieu - a.thieu || b.ti_le - a.ti_le);
+  const byKhoi = group("khoi").sort((a, b) => a.key.localeCompare(b.key));
+  const byLop = group("lop").sort((a, b) => b.ti_le - a.ti_le || b.thieu - a.thieu);
+  const lopMap = new Map(byLop.map((o) => [o.key, o]));
+
+  // ---------- chữ ----------
+  const lead = $("lead");
+  const B = (t) => el("b", null, t);
+  lead.append("Toàn trường còn ", B(fmt(T.thieu)), " lượt điểm chưa nhập, chiếm ", B(pct(r1(T.thieu, T.dau))),
+    " tổng số đầu điểm; ", B(fmt(T.chua)), " lượt lớp–môn chưa có điểm nào. Môn còn thiếu nhiều nhất là ",
+    B(byMon[0].key), " (", B(fmt(byMon[0].thieu)), " điểm), lớp thiếu nhiều nhất là ", B(byLop[0].key), " (", B(pct(byLop[0].ti_le)), ").");
+  $("n-thieu1").textContent = fmt(T.mot);
+  $("k-lopmon").textContent = fmt(T.n); $("k-solop").textContent = lops.length; $("k-somon").textContent = mons.length;
+  $("k-du").textContent = fmt(T.du); $("k-du-pct").textContent = pct(r1(T.du, T.n));
+  $("k-dang").textContent = fmt(T.dang); $("k-chua").textContent = fmt(T.chua);
+  $("k-thieu").textContent = fmt(T.thieu); $("k-thieu-pct").textContent = pct(r1(T.thieu, T.dau)); $("k-daudiem").textContent = fmt(T.dau);
+
+  // ---------- tooltip ----------
+  function makeTip(box) {
+    const tip = el("div", {class: "tip", role: "status"}); box.append(tip);
+    return {
+      show(ev, lines) {
+        tip.replaceChildren(); lines.forEach((t, i) => tip.append(i ? el("div", null, t) : el("b", null, t)));
+        tip.style.display = "block";
+        const r = box.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+        let x = ev.clientX - r.left + 14; if (x + tw > r.width) x = Math.max(0, ev.clientX - r.left - tw - 14);
+        let y = ev.clientY - r.top + 14; if (y + th > r.height + 40) y = ev.clientY - r.top - th - 10;
+        tip.style.left = x + "px"; tip.style.top = y + "px";
+      },
+      hide() { tip.style.display = "none"; }
+    };
+  }
+  function textW(svg, texts, cls) {
+    const g = sv("g", {class: cls}); svg.append(g); let w = 0;
+    texts.forEach((t) => { const n = sv("text", {class: cls}, t); g.append(n); w = Math.max(w, n.getComputedTextLength()); });
+    g.remove(); return w;
+  }
+  const niceMax = (v) => { const p = Math.pow(10, Math.floor(Math.log10(v))); const n = v / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; };
+
+  // ---------- biểu đồ theo môn ----------
+  function drawMon() {
+    const box = $("c-mon"); box.replaceChildren();
+    const W = Math.max(280, box.clientWidth), narrow = W < 560;
+    const rowH = 30, top = 4, bottom = 34, H = top + byMon.length * rowH + bottom;
+    const svg = sv("svg", {viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img", "aria-label": "Biểu đồ thanh ngang xếp chồng: số lớp theo trạng thái nhập điểm của từng môn"});
+    box.append(svg);
+    const lab = (o) => (narrow ? NGAN[o.key] || o.key : o.key);
+    const end = (o) => (o.thieu ? `${fmt(o.thieu)} điểm · ${pct(o.ti_le)}` : "✓ đủ");
+    const left = textW(svg, byMon.map(lab), "ylab") + 12, right = textW(svg, byMon.map(end), "endlab") + 12;
+    const maxV = Math.max(...byMon.map((o) => o.so_lop)); const x0 = left, x1 = Math.max(left + 40, W - right);
+    const x = (v) => x0 + (x1 - x0) * v / maxV;
+    const gy = top + byMon.length * rowH;
+    const step = narrow ? 10 : 5;
+    for (let t = 0; t <= maxV; t += step) {
+      svg.append(sv("line", {x1: x(t), x2: x(t), y1: top, y2: gy, class: "gridl"}));
+      svg.append(sv("text", {x: x(t), y: gy + 16, "text-anchor": "middle", class: "endlab"}, t));
+    }
+    svg.append(sv("line", {x1: x0, x2: x1, y1: gy, y2: gy, class: "axisl"}));
+    svg.append(sv("text", {x: x1, y: H - 2, "text-anchor": "end", class: "endlab"}, "Số lớp"));
+    const tip = makeTip(box);
+    byMon.forEach((o, i) => {
+      const g = sv("g", {class: "row", transform: `translate(0,${top + i * rowH})`, tabindex: "0", role: "button", "aria-label": `${o.key}: thiếu ${o.thieu} điểm, bấm để lọc danh sách`});
+      g.append(sv("rect", {class: "hit", x: 0, y: 0, width: W, height: rowH, fill: "transparent"}));
+      g.append(sv("text", {class: "ylab", x: left - 8, y: rowH / 2, dy: "0.35em", "text-anchor": "end"}, lab(o)));
+      let acc = 0;
+      [["du", "var(--du)"], ["dang", "var(--dang)"], ["chua", "var(--chua)"]].forEach(([k, c]) => {
+        const v = o[k]; if (!v) return;
+        const rc = sv("rect", {x: x(acc), y: 6, height: rowH - 12, width: Math.max(1, x(acc + v) - x(acc) - 1), rx: 2}); rc.style.fill = c; g.append(rc); acc += v;
+      });
+      g.append(sv("text", {class: "endlab", x: x(o.so_lop) + 6, y: rowH / 2, dy: "0.35em"}, end(o)));
+      const lines = [o.key, `Số lớp: ${o.so_lop}`, `✓ Đã đủ: ${o.du} · ◐ Chưa đủ: ${o.dang} · ✕ Chưa nhập: ${o.chua}`, `Đầu điểm thiếu: ${fmt(o.thieu)} / ${fmt(o.dau)} (${pct(o.ti_le)})`, "Bấm để lọc danh sách"];
+      g.addEventListener("pointermove", (ev) => tip.show(ev, lines));
+      g.addEventListener("pointerleave", () => tip.hide());
+      const pick = () => { $("f-mon").value = o.key; $("f-tt").value = "thieu"; renderTable(); $("danh-sach").scrollIntoView({behavior: "smooth", block: "start"}); };
+      g.addEventListener("click", pick);
+      g.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pick(); } });
+      svg.append(g);
+    });
+  }
+
+  // ---------- thanh đơn ----------
+  function drawBars(boxId, data, labelOf, valOf, endOf, aria, tipOf) {
+    const box = $(boxId); box.replaceChildren();
+    const W = Math.max(240, box.clientWidth), rowH = 32, H = data.length * rowH + 26;
+    const svg = sv("svg", {viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img", "aria-label": aria}); box.append(svg);
+    const left = textW(svg, data.map(labelOf), "ylab") + 12, right = textW(svg, data.map(endOf), "endlab") + 12;
+    const maxV = niceMax(Math.max(...data.map(valOf)) || 1); const x0 = left, x1 = Math.max(left + 30, W - right);
+    const x = (v) => x0 + (x1 - x0) * v / maxV; const gy = data.length * rowH;
+    [0, maxV / 2, maxV].forEach((t) => { svg.append(sv("line", {x1: x(t), x2: x(t), y1: 0, y2: gy, class: "gridl"})); svg.append(sv("text", {x: x(t), y: gy + 16, "text-anchor": "middle", class: "endlab"}, pct(t).replace(",0", ""))); });
+    svg.append(sv("line", {x1: x0, x2: x1, y1: gy, y2: gy, class: "axisl"}));
+    const tip = makeTip(box);
+    data.forEach((o, i) => {
+      const g = sv("g", {transform: `translate(0,${i * rowH})`});
+      g.append(sv("rect", {x: 0, y: 0, width: W, height: rowH, fill: "transparent"}));
+      g.append(sv("text", {class: "ylab", x: left - 8, y: rowH / 2, dy: "0.35em", "text-anchor": "end"}, labelOf(o)));
+      const rc = sv("rect", {x: x0, y: 7, height: rowH - 14, rx: 2, width: Math.max(1, x(valOf(o)) - x0)}); rc.style.fill = "var(--du)"; g.append(rc);
+      g.append(sv("text", {class: "endlab", x: x(valOf(o)) + 6, y: rowH / 2, dy: "0.35em"}, endOf(o)));
+      g.addEventListener("pointermove", (ev) => tip.show(ev, tipOf(o))); g.addEventListener("pointerleave", () => tip.hide());
+      svg.append(g);
+    });
+  }
+  function drawKhoi() {
+    drawBars("c-khoi", byKhoi, (o) => "Khối " + o.key, (o) => o.ti_le, (o) => `${pct(o.ti_le)} · ${fmt(o.thieu)} điểm`,
+      "Biểu đồ thanh: tỉ lệ đầu điểm thiếu theo khối 10, 11, 12",
+      (o) => ["Khối " + o.key, `Đầu điểm thiếu: ${fmt(o.thieu)} / ${fmt(o.dau)}`, `Tỉ lệ: ${pct(o.ti_le)}`, `Lớp–môn chưa nhập: ${o.chua}`]);
+  }
+  function drawLop() {
+    drawBars("c-lop", byLop.slice(0, 5), (o) => o.key, (o) => o.ti_le, (o) => `${pct(o.ti_le)} · ${o.chua} môn chưa nhập`,
+      "Biểu đồ thanh: 5 lớp có tỉ lệ đầu điểm thiếu cao nhất",
+      (o) => ["Lớp " + o.key, `Đầu điểm thiếu: ${fmt(o.thieu)} / ${fmt(o.dau)} (${pct(o.ti_le)})`, `Môn chưa nhập cả lớp: ${o.chua}`, `Môn nhập chưa đủ: ${o.dang}`]);
+  }
+
+  // ---------- ma trận ----------
+  function drawMatrix() {
+    const box = $("matrix"); box.replaceChildren();
+    const cell = new Map(rows.map((r) => [r.lop + "|" + r.mon, r]));
+    const t = el("table", {class: "mt"}); const thead = el("thead"); const hr = el("tr");
+    hr.append(el("th", {class: "rowh", scope: "col"}, "Lớp"));
+    mons.forEach((m) => hr.append(el("th", {scope: "col", title: m}, NGAN[m] || m)));
+    hr.append(el("th", {scope: "col"}, "% thiếu")); thead.append(hr); t.append(thead);
+    const tb = el("tbody"); let prev = null;
+    lops.forEach((lop) => {
+      const k = lop.slice(0, 2); const tr = el("tr", prev && k !== prev ? {class: "k1"} : null); prev = k;
+      tr.append(el("th", {class: "rowh", scope: "row"}, lop));
+      mons.forEach((m) => {
+        const r = cell.get(lop + "|" + m);
+        if (!r) { tr.append(el("td", {class: "c-na", title: `${lop} không có ${m} trong tệp`}, "")); return; }
+        tr.append(el("td", {class: "c-" + r.tt, title: `${lop} · ${m}: ${r.chua_co_diem ? r.chua_co_diem + "/" + r.si_so + " HS chưa có điểm" : "đã nhập đủ " + r.si_so + " HS"}`}, r.chua_co_diem ? fmt(r.chua_co_diem) : "✓"));
+      });
+      tr.append(el("td", {class: "c-tl"}, pct(lopMap.get(lop).ti_le))); tb.append(tr);
+    });
+    t.append(tb); box.append(t);
+  }
+
+  // ---------- danh sách ----------
+  const sel = $("f-mon"); mons.forEach((m) => sel.append(el("option", {value: m}, m)));
+  let sortK = null, sortDir = 1;
+  function renderTable() {
+    const fm = $("f-mon").value, fk = $("f-khoi").value, ft = $("f-tt").value;
+    let data = rows.filter((r) => (!fm || r.mon === fm) && (!fk || r.khoi === fk) && (ft === "thieu" ? r.tt !== "du" : !ft || r.tt === ft));
+    if (sortK) {
+      data.sort((a, b) => {
+        let va = a[sortK], vb = b[sortK];
+        if (sortK === "lop") { va = lopKey(va); vb = lopKey(vb); }
+        if (sortK === "tt") { va = TT_ORDER[va]; vb = TT_ORDER[vb]; }
+        if (typeof va === "string") return va.localeCompare(vb, "vi") * sortDir;
+        return (va - vb) * sortDir;
+      });
+    } else {
+      data.sort((a, b) => b.chua_co_diem - a.chua_co_diem || a.mon.localeCompare(b.mon, "vi") || lopKey(a.lop) - lopKey(b.lop));
+    }
+    const tb = $("tbody"); tb.replaceChildren();
+    if (!data.length) { const tr = el("tr"); tr.append(el("td", {colspan: 6}, "Không có lớp–môn nào khớp bộ lọc.")); tb.append(tr); }
+    data.forEach((r) => {
+      const tr = el("tr");
+      tr.append(el("td", null, r.mon), el("td", null, r.lop), el("td", {class: "num"}, fmt(r.si_so)), el("td", {class: "num"}, fmt(r.chua_co_diem)), el("td", {class: "num"}, pct(r.ti_le)));
+      const td = el("td"); td.append(el("span", {class: "badge b-" + r.tt}, TT[r.tt])); tr.append(td); tb.append(tr);
+    });
+    $("f-count").textContent = fmt(data.length);
+    document.querySelectorAll(".list th").forEach((th) => { th.querySelector(".arr").textContent = th.dataset.k === sortK ? (sortDir > 0 ? "▲" : "▼") : ""; th.setAttribute("aria-sort", th.dataset.k === sortK ? (sortDir > 0 ? "ascending" : "descending") : "none"); });
+  }
+  ["f-mon", "f-khoi", "f-tt"].forEach((id) => $(id).addEventListener("change", renderTable));
+  document.querySelectorAll(".list th").forEach((th) => th.addEventListener("click", () => {
+    const k = th.dataset.k; if (sortK === k) sortDir = -sortDir; else { sortK = k; sortDir = (k === "mon" || k === "lop" || k === "tt") ? 1 : -1; } renderTable();
+  }));
+
+  // ---------- nền sáng/tối, in ----------
+  const btnT = $("btn-theme");
+  const setTheme = (dark) => { document.documentElement.classList.toggle("dark", dark); btnT.textContent = dark ? "Nền sáng" : "Nền tối"; btnT.setAttribute("aria-pressed", dark); };
+  let pref = null; try { pref = localStorage.getItem("ntt-theme"); } catch (e) {}
+  setTheme(pref ? pref === "dark" : window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+  btnT.addEventListener("click", () => { const d = !document.documentElement.classList.contains("dark"); setTheme(d); try { localStorage.setItem("ntt-theme", d ? "dark" : "light"); } catch (e) {} });
+  $("btn-print").addEventListener("click", () => window.print());
+
+  function drawAll() { drawMon(); drawKhoi(); drawLop(); }
+  drawAll(); drawMatrix(); renderTable();
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawAll, 120); });
+  window.addEventListener("beforeprint", drawAll); window.addEventListener("afterprint", drawAll);
+})();
+</script>
+</body>
+</html>
